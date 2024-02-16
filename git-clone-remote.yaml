@@ -1,0 +1,27 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: git-clone
+  annotations:
+    pipelinesascode.tekton.dev/on-event: "[pull_request]"
+    pipelinesascode.tekton.dev/on-target-branch: "main"
+    pipelinesascode.tekton.dev/task: "[git-clone]"
+spec:
+  tasks:
+    - name: fetch-repository
+      workspaces:
+        - name: output
+          workspace: source
+        - name: ssh-directory
+          workspace: ssh-directory
+      params:
+        - name: depth
+          value: "0"
+        - name: url
+          value: $(params.repo_url)
+        - name: revision
+          value: $(params.git_revision)
+      taskRef:
+        name: git-clone
+        kind: ClusterTask
